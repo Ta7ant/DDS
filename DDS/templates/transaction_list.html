@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Движение денежных средств</h1>
+    <a href="{% url 'transaction_create' %}" class="btn btn-primary">+ Добавить запись</a>
+</div>
+
+<!-- Простые фильтры -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Фильтры</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label">Дата от</label>
+                <input type="date" name="date_after" class="form-control" value="{{ current_filters.date_after }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Дата до</label>
+                <input type="date" name="date_before" class="form-control" value="{{ current_filters.date_before }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Статус</label>
+                <select name="status" class="form-select">
+                    <option value="">Все статусы</option>
+                    <option value="Бизнес" {% if current_filters.status == "Бизнес" %}selected{% endif %}>Бизнес</option>
+                    <option value="Личное" {% if current_filters.status == "Личное" %}selected{% endif %}>Личное</option>
+                    <option value="Налог" {% if current_filters.status == "Налог" %}selected{% endif %}>Налог</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Тип операции</label>
+                <select name="operation_type" class="form-select">
+                    <option value="">Все типы</option>
+                    <option value="Пополнение" {% if current_filters.operation_type == "Пополнение" %}selected{% endif %}>Пополнение</option>
+                    <option value="Списание" {% if current_filters.operation_type == "Списание" %}selected{% endif %}>Списание</option>
+                </select>
+            </div>
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary">Применить фильтры</button>
+                <a href="{% url 'transaction_list' %}" class="btn btn-secondary">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Таблица с транзакциями -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Статус</th>
+                        <th>Тип</th>
+                        <th>Категория</th>
+                        <th>Подкатегория</th>
+                        <th>Сумма</th>
+                        <th>Комментарий</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.date|date:"d.m.Y" }}</td>
+                        <td>{{ transaction.status }}</td>
+                        <td>{{ transaction.operation_type }}</td>
+                        <td>{{ transaction.category }}</td>
+                        <td>{{ transaction.subcategory }}</td>
+                        <td>{{ transaction.amount }} ₽</td>
+                        <td>{{ transaction.comment|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'transaction_update' transaction.pk %}" class="btn btn-sm btn-warning">✏️</a>
+                            <a href="{% url 'transaction_delete' transaction.pk %}" class="btn btn-sm btn-danger">🗑️</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">Нет записей</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

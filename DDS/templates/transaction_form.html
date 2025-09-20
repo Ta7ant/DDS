@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>{% if object %}Редактировать{% else %}Создать{% endif %} запись</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" id="transaction-form">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <div class="text-danger">
+                            {{ field.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                        <a href="{% url 'transaction_list' %}" class="btn btn-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Простые зависимости для студента
+function updateTypes() {
+    const status = document.getElementById('id_status').value;
+    const typeSelect = document.getElementById('id_operation_type');
+    
+    // Очищаем и заполняем типы
+    typeSelect.innerHTML = '<option value="">---------</option>';
+    
+    if (status === 'Бизнес') {
+        addOption(typeSelect, 'Зарплата', 'Зарплата');
+        addOption(typeSelect, 'Расходы', 'Расходы');
+        addOption(typeSelect, 'Инвестиции', 'Инвестиции');
+    }
+    else if (status === 'Личное') {
+        addOption(typeSelect, 'Доход', 'Доход');
+        addOption(typeSelect, 'Расход', 'Расход');
+        addOption(typeSelect, 'Сбережения', 'Сбережения');
+    }
+    else if (status === 'Налог') {
+        addOption(typeSelect, 'Уплата', 'Уплата');
+        addOption(typeSelect, 'Возврат', 'Возврат');
+    }
+    
+    // Очищаем зависимые поля
+    updateCategories();
+}
+
+function updateCategories() {
+    const status = document.getElementById('id_status').value;
+    const operationType = document.getElementById('id_operation_type').value;
+    const categorySelect = document.getElementById('id_category');
+    
+    // Очищаем категории
+    categorySelect.innerHTML = '<option value="">---------</option>';
+    
+    if (status === 'Бизнес' && operationType === 'Зарплата') {
+        addOption(categorySelect, 'Разработчики', 'Разработчики');
+        addOption(categorySelect, 'Менеджеры', 'Менеджеры');
+        addOption(categorySelect, 'Дизайнеры', 'Дизайнеры');
+    }
+    else if (status === 'Бизнес' && operationType === 'Расходы') {
+        addOption(categorySelect, 'Офис', 'Офис');
+        addOption(categorySelect, 'Маркетинг', 'Маркетинг');
+        addOption(categorySelect, 'Инфраструктура', 'Инфраструктура');
+    }
+    // Добавь другие комбинации по аналогии...
+    
+    // Очищаем подкатегории
+    updateSubcategories();
+}
+
+function updateSubcategories() {
+    const category = document.getElementById('id_category').value;
+    const subcategorySelect = document.getElementById('id_subcategory');
+    
+    // Очищаем подкатегории
+    subcategorySelect.innerHTML = '<option value="">---------</option>';
+    
+    if (category === 'Разработчики') {
+        addOption(subcategorySelect, 'Frontend', 'Frontend');
+        addOption(subcategorySelect, 'Backend', 'Backend');
+        addOption(subcategorySelect, 'Mobile', 'Mobile');
+    }
+    else if (category === 'Менеджеры') {
+        addOption(subcategorySelect, 'Проектные', 'Проектные');
+        addOption(subcategorySelect, 'Продуктовые', 'Продуктовые');
+    }
+    // Добавь другие категории по аналогии...
+}
+
+// Вспомогательная функция
+function addOption(select, value, text) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = text;
+    select.appendChild(option);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dateField = document.getElementById('id_date');
+    if (dateField && !dateField.value) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateField.value = `${yyyy}-${mm}-${dd}`;
+    }
+});
+
+// Вешаем обработчики
+document.getElementById('id_status').addEventListener('change', updateTypes);
+document.getElementById('id_operation_type').addEventListener('change', updateCategories);
+document.getElementById('id_category').addEventListener('change', updateSubcategories);
+</script>
+{% endblock %}
